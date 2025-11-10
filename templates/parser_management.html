@@ -448,9 +448,15 @@
             <div class="test-panel">
                 <div class="test-header">
                     <span>测试解析器</span>
-                    <button class="btn" id="runTestBtn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
-                        运行测试
-                    </button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="file" id="fileUpload" accept=".txt,.html" style="display: none;">
+                        <button class="btn" id="uploadFileBtn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+                            上传文件
+                        </button>
+                        <button class="btn" id="runTestBtn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+                            运行测试
+                        </button>
+                    </div>
                 </div>
                 <textarea class="test-input" placeholder="输入HTML内容进行测试..."></textarea>
                 <div class="test-result" id="testResult">测试结果将显示在这里...</div>
@@ -586,6 +592,28 @@
         document.getElementById('saveBtn').addEventListener('click', saveParserCode);
         document.getElementById('reloadBtn').addEventListener('click', reloadParser);
         document.getElementById('runTestBtn').addEventListener('click', runParserTest);
+        
+        // 文件上传功能
+        document.getElementById('uploadFileBtn').addEventListener('click', function() {
+            document.getElementById('fileUpload').click();
+        });
+        
+        document.getElementById('fileUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.querySelector('.test-input').value = event.target.result;
+                    alert('文件已成功加载到测试输入区域');
+                };
+                reader.onerror = function() {
+                    alert('文件读取失败，请重试');
+                };
+                reader.readAsText(file);
+            }
+            // 清空文件选择，允许重复选择同一文件
+            this.value = '';
+        });
     }
 
     // 选择解析器
@@ -609,6 +637,16 @@
         document.getElementById('lastModified').textContent = `最后修改: ${new Date(parser.last_modified).toLocaleString('zh-CN')}`;
         
         editor.setValue(parser.code);
+        
+        // 清理测试输入区域和结果区域的内容
+        const testInput = document.querySelector('.test-input');
+        const testResult = document.querySelector('.test-result');
+        if (testInput) testInput.value = '';
+        if (testResult) testResult.textContent = '// 解析结果将显示在这里';
+        
+        // 清空文件上传
+        const fileUpload = document.getElementById('fileUpload');
+        if (fileUpload) fileUpload.value = '';
     }
 
     // 显示添加解析器模态框
@@ -723,7 +761,7 @@
         
         const testInput = document.querySelector('.test-input').value;
         if (!testInput.trim()) {
-            alert('请输入测试的HTML内容');
+            alert('请输入测试的HTML内容或上传文件');
             return;
         }
         
@@ -744,6 +782,7 @@
             if (data.error) {
                 document.getElementById('testResult').textContent = `测试失败: ${data.error}`;
             } else {
+                // 显示格式化的JSON结果
                 document.getElementById('testResult').textContent = JSON.stringify(data.result, null, 2);
             }
         })

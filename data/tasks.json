@@ -174,5 +174,49 @@
     "message": "处理完成",
     "result_file": "static/uploads\\3db5f22f-ebef-4d7f-98f9-e428526c715e\\result.xlsx",
     "created_at": "2025-11-10T19:59:04.376256"
+  },
+  "0990fdb0-3961-45d2-b408-d82a8f500369": {
+    "task_id": "0990fdb0-3961-45d2-b408-d82a8f500369",
+    "name": "3333",
+    "excel_file": "static/uploads\\0990fdb0-3961-45d2-b408-d82a8f500369\\input.xlsx",
+    "txt_folder": "static/uploads\\0990fdb0-3961-45d2-b408-d82a8f500369\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\0990fdb0-3961-45d2-b408-d82a8f500369\\result.xlsx",
+    "created_at": "2025-11-10T20:49:29.534277"
+  },
+  "cd04c0ee-a783-43d3-a5b5-8895371043fc": {
+    "task_id": "cd04c0ee-a783-43d3-a5b5-8895371043fc",
+    "name": "3213213",
+    "excel_file": "static/uploads\\cd04c0ee-a783-43d3-a5b5-8895371043fc\\input.xlsx",
+    "txt_folder": "static/uploads\\cd04c0ee-a783-43d3-a5b5-8895371043fc\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\cd04c0ee-a783-43d3-a5b5-8895371043fc\\result.xlsx",
+    "created_at": "2025-11-10T20:51:27.954178"
+  },
+  "54c98fc0-37b1-4b35-b023-0ac610f8097b": {
+    "task_id": "54c98fc0-37b1-4b35-b023-0ac610f8097b",
+    "name": "23213",
+    "excel_file": "static/uploads\\54c98fc0-37b1-4b35-b023-0ac610f8097b\\input.xlsx",
+    "txt_folder": "static/uploads\\54c98fc0-37b1-4b35-b023-0ac610f8097b\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\54c98fc0-37b1-4b35-b023-0ac610f8097b\\result.xlsx",
+    "created_at": "2025-11-10T21:03:17.588426"
+  },
+  "55567187-a367-412f-9f70-b2dc2ab7fd88": {
+    "task_id": "55567187-a367-412f-9f70-b2dc2ab7fd88",
+    "name": "小绿书",
+    "excel_file": "static/uploads\\55567187-a367-412f-9f70-b2dc2ab7fd88\\input.xlsx",
+    "txt_folder": "static/uploads\\55567187-a367-412f-9f70-b2dc2ab7fd88\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\55567187-a367-412f-9f70-b2dc2ab7fd88\\result.xlsx",
+    "created_at": "2025-11-10T21:07:53.618626"
   }
 }

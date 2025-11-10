@@ -248,8 +248,8 @@ def test_parser(parser_name):
         
         # 定义BaseParser类的简化版本用于测试，处理相对导入问题
         class BaseParser:
-            def __init__(self):
-                self.file_path = 'test_file.html'
+            def __init__(self, file_path='test_file.html'):
+                self.file_path = file_path
                 
             class Logger:
                 def info(self, msg):
@@ -284,111 +284,12 @@ def test_parser(parser_name):
         
         # 创建解析器实例并运行测试
         parser_class = exec_globals[parser_name]
-        parser_instance = parser_class()
+        parser_instance = parser_class('test_file.html')  # 传递file_path参数
         
-        # 动态替换解析器实例的parse_comments方法为自定义实现
-        def dynamic_parse_comments(self, html: str):
-            """动态解析评论内容"""
-            from bs4 import BeautifulSoup
-            from datetime import datetime
-            import hashlib
-            
-            soup = BeautifulSoup(html, 'lxml')
-            comments = []
-            
-            # 实现具体的解析逻辑，根据HTML结构提取评论数据
-            # 尝试多种常见的评论选择器模式
-            comment_selectors = [
-                ('div', {'class': lambda x: x and ('comment' in x or '评论' in x)}),
-                ('div', {'class': lambda x: x and ('item' in x)}),
-                ('li', {'class': lambda x: x and ('comment' in x or '评论' in x)}),
-                ('article', {'class': lambda x: x and ('comment' in x or '评论' in x)}),
-                ('div', {'class': 'comment-item'}),
-                ('div', {'class': 'comment-content'}),
-                ('div', {'class': 'comment-list-item'}),
-            ]
-            
-            # 遍历选择器，直到找到评论项或尝试完所有选择器
-            comment_items = []
-            for tag, attrs in comment_selectors:
-                found_items = soup.find_all(tag, attrs)
-                if found_items:
-                    comment_items = found_items
-                    break
-            
-            # 如果找到了评论项，则解析每个评论
-            if comment_items:
-                for item in comment_items:
-                    # 尝试提取作者信息
-                    author = ''
-                    author_elems = item.find_all(['span', 'div', 'a'], {'class': lambda x: x and ('author' in x or 'user' in x or '用户名' in x or '昵称' in x)})
-                    if author_elems:
-                        author = author_elems[0].get_text(strip=True)
-                    
-                    # 尝试提取评论内容
-                    content = ''
-                    content_elems = item.find_all(['p', 'div', 'span'], {'class': lambda x: x and ('content' in x or '评论' in x or 'text' in x or 'body' in x)})
-                    if content_elems:
-                        content = content_elems[0].get_text(strip=True)
-                    
-                    # 尝试提取评论时间
-                    time = ''
-                    time_elems = item.find_all(['span', 'div'], {'class': lambda x: x and ('time' in x or 'date' in x or '时间' in x or '发表' in x)})
-                    if time_elems:
-                        time = time_elems[0].get_text(strip=True)
-                    
-                    # 如果至少有作者或内容，则添加到结果中
-                    if author or content:
-                        comments.append({
-                            '作者': author if author else '未知用户',
-                            '评论内容': content if content else '无内容',
-                            '评论时间': time if time else '未知时间',
-                            '评论地点': '未知地点',
-                            '图片地址': '无',
-                            '是否回复': '否',
-                            '回复给': '无'
-                        })
-            
-            # 如果没有找到任何评论，尝试直接从HTML中提取文本作为内容（作为备选方案）
-            if not comments and len(html) < 10000:  # 避免处理过大的HTML
-                # 提取纯文本，去除多余空白
-                text = soup.get_text(separator=' ', strip=True)
-                if text:
-                    # 截取前100个字符作为示例
-                    preview_text = text[:100] + '...' if len(text) > 100 else text
-                    comments.append({
-                        '作者': '自动提取',
-                        '评论内容': preview_text,
-                        '评论时间': '未知',
-                        '评论地点': '未知',
-                        '图片地址': '无',
-                        '是否回复': '否',
-                        '回复给': '无'
-                    })
-            
-            # 如果仍然没有评论，返回根据输入HTML生成的动态测试数据
-            if not comments:
-                # 使用HTML内容生成动态测试数据
-                # 截取前30个字符作为内容预览
-                content_preview = html[:30].replace('<', '&lt;').replace('>', '&gt;') + '...' if html else '空HTML内容'
-                user_id = hashlib.md5(html.encode()).hexdigest()[:8]
-                
-                comments.append({
-                    '作者': f'动态用户_{user_id}',
-                    '评论内容': f'基于输入HTML生成: {content_preview}',
-                    '评论时间': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    '评论地点': '动态生成',
-                    '图片地址': '无',
-                    '是否回复': '否',
-                    '回复给': '无'
-                })
-            
-            return comments
+        # 不使用自定义解析方法，直接使用解析器自身的parse实现
         
-        # 绑定动态方法到解析器实例
-        import types
-        parser_instance.parse_comments = types.MethodType(dynamic_parse_comments, parser_instance)
-        print("已动态替换解析器实例的parse_comments方法")
+        # 不替换解析器的parse方法，直接使用解析器自身的实现
+        print("使用解析器自身的parse方法")
         
         # 捕获标准输出
         captured_output = io.StringIO()
