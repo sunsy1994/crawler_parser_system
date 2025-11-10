@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}新建任务 - 爬虫解析系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+        color: var(--apple-gray);
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 18px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .form-hint {
+        font-size: 0.9rem;
+        color: var(--apple-gray);
+        margin-top: 0.5rem;
+    }
+    
+    input, textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+    
+    input:focus, textarea:focus {
+        outline: none;
+        border-color: var(--apple-blue);
+        box-shadow: 0 0 0 4px rgba(0,113,227,0.1);
+    }
+    
+    .file-upload {
+        border: 2px dashed var(--apple-border);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    
+    .file-upload:hover {
+        border-color: var(--apple-blue);
+    }
+    
+    .file-upload.dragover {
+        border-color: var(--apple-blue);
+        background: rgba(0,113,227,0.05);
+    }
+    
+    .upload-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--apple-gray);
+    }
+    
+    .file-list {
+        margin-top: 1rem;
+    }
+    
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: var(--apple-bg);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-name {
+        font-weight: 500;
+    }
+    
+    .file-size {
+        color: var(--apple-gray);
+        font-size: 0.9rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">新建解析任务</h1>
+    <p class="page-subtitle">上传配置文件和相关文件开始解析任务</p>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="form-card">
+    <div class="form-group">
+        <label for="task_name">任务名称</label>
+        <input type="text" id="task_name" name="task_name" placeholder="请输入任务名称" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="excel_file">Excel配置文件</label>
+        <div class="file-upload" onclick="document.getElementById('excel_file').click()">
+            <div class="upload-icon">📊</div>
+            <div>点击选择Excel文件或拖拽到此区域</div>
+            <div class="form-hint">必须包含"渠道"、"url"、"txt_file"三列</div>
+            <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls" required style="display: none;">
+        </div>
+        <div class="file-list" id="excelFileList"></div>
+    </div>
+    
+    <div class="form-group">
+        <label for="txt_files">TXT文件</label>
+        <div class="file-upload" onclick="document.getElementById('txt_files').click()">
+            <div class="upload-icon">📄</div>
+            <div>点击选择TXT文件或拖拽到此区域</div>
+            <div class="form-hint">支持多文件选择，包含HTML源码的文本文件</div>
+            <input type="file" id="txt_files" name="txt_files" accept=".txt" multiple required style="display: none;">
+        </div>
+        <div class="file-list" id="fileList"></div>
+    </div>
+    
+    <div class="form-group">
+        <label for="description">任务描述（可选）</label>
+        <textarea id="description" name="description" rows="3" placeholder="请输入任务描述..."></textarea>
+    </div>
+    
+    <div class="form-actions">
+        <a href="/" class="btn btn-secondary">取消</a>
+        <a href="/download_template" class="btn btn-secondary">下载模板</a>
+        <button type="submit" class="btn">创建任务</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Excel文件选择显示
+    document.getElementById('excel_file').addEventListener('change', function(e) {
+        const fileList = document.getElementById('excelFileList');
+        fileList.innerHTML = '';
+        
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${(file.size / 1024).toFixed(1)} KB</div>
+            `;
+            fileList.appendChild(fileItem);
+        }
+    });
+    
+    // TXT文件选择显示
+    document.getElementById('txt_files').addEventListener('change', function(e) {
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '';
+        
+        Array.from(e.target.files).forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${(file.size / 1024).toFixed(1)} KB</div>
+            `;
+            fileList.appendChild(fileItem);
+        });
+    });
+
+    // 拖拽功能
+    const uploadAreas = document.querySelectorAll('.file-upload');
+    uploadAreas.forEach(uploadArea => {
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (uploadArea.querySelector('input[type="file"][accept*=".xlsx"]')) {
+                // Excel文件
+                document.getElementById('excel_file').files = files;
+                document.getElementById('excel_file').dispatchEvent(new Event('change'));
+            } else {
+                // TXT文件
+                document.getElementById('txt_files').files = files;
+                document.getElementById('txt_files').dispatchEvent(new Event('change'));
+            }
+        });
+    });
+</script>
+{% endblock %}

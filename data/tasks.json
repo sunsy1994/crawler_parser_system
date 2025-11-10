@@ -1,0 +1,178 @@
+{
+  "5e8456d5-6d04-4587-8896-eacb4507cbfc": {
+    "task_id": "5e8456d5-6d04-4587-8896-eacb4507cbfc",
+    "name": "测试第一个任务",
+    "excel_file": "static/uploads\\5e8456d5-6d04-4587-8896-eacb4507cbfc\\input.xlsx",
+    "txt_folder": "static/uploads\\5e8456d5-6d04-4587-8896-eacb4507cbfc\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\5e8456d5-6d04-4587-8896-eacb4507cbfc\\result.xlsx",
+    "created_at": "2025-10-12T21:25:58.290681"
+  },
+  "1634592b-1fd6-4abf-8945-72a99d9b8fe4": {
+    "task_id": "1634592b-1fd6-4abf-8945-72a99d9b8fe4",
+    "name": "测试任务2",
+    "excel_file": "static/uploads\\1634592b-1fd6-4abf-8945-72a99d9b8fe4\\input.xlsx",
+    "txt_folder": "static/uploads\\1634592b-1fd6-4abf-8945-72a99d9b8fe4\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\1634592b-1fd6-4abf-8945-72a99d9b8fe4\\result.xlsx",
+    "created_at": "2025-10-12T21:50:37.922652"
+  },
+  "175bf458-033e-4100-8e13-5232081ab75a": {
+    "task_id": "175bf458-033e-4100-8e13-5232081ab75a",
+    "name": "测试第三个任务",
+    "excel_file": "static/uploads\\175bf458-033e-4100-8e13-5232081ab75a\\input.xlsx",
+    "txt_folder": "static/uploads\\175bf458-033e-4100-8e13-5232081ab75a\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\175bf458-033e-4100-8e13-5232081ab75a\\result.xlsx",
+    "created_at": "2025-10-12T21:51:49.160639"
+  },
+  "e8a19809-e349-4940-a46f-5228b8f39bee": {
+    "task_id": "e8a19809-e349-4940-a46f-5228b8f39bee",
+    "name": "测试第四个任务",
+    "excel_file": "static/uploads\\e8a19809-e349-4940-a46f-5228b8f39bee\\input.xlsx",
+    "txt_folder": "static/uploads\\e8a19809-e349-4940-a46f-5228b8f39bee\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\e8a19809-e349-4940-a46f-5228b8f39bee\\result.xlsx",
+    "created_at": "2025-10-12T21:56:59.729116"
+  },
+  "34865fe8-06e9-4496-8e23-2b670cb17387": {
+    "task_id": "34865fe8-06e9-4496-8e23-2b670cb17387",
+    "name": "1110懂车帝",
+    "excel_file": "static/uploads\\34865fe8-06e9-4496-8e23-2b670cb17387\\input.xlsx",
+    "txt_folder": "static/uploads\\34865fe8-06e9-4496-8e23-2b670cb17387\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\34865fe8-06e9-4496-8e23-2b670cb17387\\result.xlsx",
+    "created_at": "2025-11-10T17:54:50.119175"
+  },
+  "fca21f04-f7b9-4cb6-99e6-ed09845cc4da": {
+    "task_id": "fca21f04-f7b9-4cb6-99e6-ed09845cc4da",
+    "name": "测试第一个任务",
+    "excel_file": "static/uploads\\fca21f04-f7b9-4cb6-99e6-ed09845cc4da\\input.xlsx",
+    "txt_folder": "static/uploads\\fca21f04-f7b9-4cb6-99e6-ed09845cc4da\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\fca21f04-f7b9-4cb6-99e6-ed09845cc4da\\result.xlsx",
+    "created_at": "2025-11-10T17:56:25.342843"
+  },
+  "fdd3277f-44e7-41c9-8cbc-585edadab548": {
+    "task_id": "fdd3277f-44e7-41c9-8cbc-585edadab548",
+    "name": "ddd",
+    "excel_file": "static/uploads\\fdd3277f-44e7-41c9-8cbc-585edadab548\\input.xlsx",
+    "txt_folder": "static/uploads\\fdd3277f-44e7-41c9-8cbc-585edadab548\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\fdd3277f-44e7-41c9-8cbc-585edadab548\\result.xlsx",
+    "created_at": "2025-11-10T18:22:18.983461"
+  },
+  "c05d0fdf-5ed1-46d0-8689-1570381be01a": {
+    "task_id": "c05d0fdf-5ed1-46d0-8689-1570381be01a",
+    "name": "222",
+    "excel_file": "static/uploads\\c05d0fdf-5ed1-46d0-8689-1570381be01a\\input.xlsx",
+    "txt_folder": "static/uploads\\c05d0fdf-5ed1-46d0-8689-1570381be01a\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\c05d0fdf-5ed1-46d0-8689-1570381be01a\\result.xlsx",
+    "created_at": "2025-11-10T18:23:18.438447"
+  },
+  "cd2afa19-b48a-4a15-8e0b-712bb1cd1006": {
+    "task_id": "cd2afa19-b48a-4a15-8e0b-712bb1cd1006",
+    "name": "222",
+    "excel_file": "static/uploads\\cd2afa19-b48a-4a15-8e0b-712bb1cd1006\\input.xlsx",
+    "txt_folder": "static/uploads\\cd2afa19-b48a-4a15-8e0b-712bb1cd1006\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\cd2afa19-b48a-4a15-8e0b-712bb1cd1006\\result.xlsx",
+    "created_at": "2025-11-10T18:49:29.795778"
+  },
+  "db9ce677-4c26-4ab1-9eda-7f59c2c95a28": {
+    "task_id": "db9ce677-4c26-4ab1-9eda-7f59c2c95a28",
+    "name": "22",
+    "excel_file": "static/uploads\\db9ce677-4c26-4ab1-9eda-7f59c2c95a28\\input.xlsx",
+    "txt_folder": "static/uploads\\db9ce677-4c26-4ab1-9eda-7f59c2c95a28\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\db9ce677-4c26-4ab1-9eda-7f59c2c95a28\\result.xlsx",
+    "created_at": "2025-11-10T18:52:42.986963"
+  },
+  "43880292-6abd-48fa-9430-49b67945b5d3": {
+    "task_id": "43880292-6abd-48fa-9430-49b67945b5d3",
+    "name": "ee",
+    "excel_file": "static/uploads\\43880292-6abd-48fa-9430-49b67945b5d3\\input.xlsx",
+    "txt_folder": "static/uploads\\43880292-6abd-48fa-9430-49b67945b5d3\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\43880292-6abd-48fa-9430-49b67945b5d3\\result.xlsx",
+    "created_at": "2025-11-10T18:54:01.611634"
+  },
+  "2067b8f0-e7b3-46cd-94d0-69ab9c040a52": {
+    "task_id": "2067b8f0-e7b3-46cd-94d0-69ab9c040a52",
+    "name": "测试第一个任务",
+    "excel_file": "static/uploads\\2067b8f0-e7b3-46cd-94d0-69ab9c040a52\\input.xlsx",
+    "txt_folder": "static/uploads\\2067b8f0-e7b3-46cd-94d0-69ab9c040a52\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\2067b8f0-e7b3-46cd-94d0-69ab9c040a52\\result.xlsx",
+    "created_at": "2025-11-10T19:40:35.923245"
+  },
+  "98961dbb-fcfb-4075-8f41-5c14d3ad6121": {
+    "task_id": "98961dbb-fcfb-4075-8f41-5c14d3ad6121",
+    "name": "测试第一个任务",
+    "excel_file": "static/uploads\\98961dbb-fcfb-4075-8f41-5c14d3ad6121\\input.xlsx",
+    "txt_folder": "static/uploads\\98961dbb-fcfb-4075-8f41-5c14d3ad6121\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\98961dbb-fcfb-4075-8f41-5c14d3ad6121\\result.xlsx",
+    "created_at": "2025-11-10T19:42:38.078670"
+  },
+  "fd343960-d973-4974-a3fe-cde83b36b6ff": {
+    "task_id": "fd343960-d973-4974-a3fe-cde83b36b6ff",
+    "name": "测试第一个任务",
+    "excel_file": "static/uploads\\fd343960-d973-4974-a3fe-cde83b36b6ff\\input.xlsx",
+    "txt_folder": "static/uploads\\fd343960-d973-4974-a3fe-cde83b36b6ff\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\fd343960-d973-4974-a3fe-cde83b36b6ff\\result.xlsx",
+    "created_at": "2025-11-10T19:44:11.485726"
+  },
+  "72c6de44-b4ed-40eb-bb46-47d987b3bd87": {
+    "task_id": "72c6de44-b4ed-40eb-bb46-47d987b3bd87",
+    "name": "22",
+    "excel_file": "static/uploads\\72c6de44-b4ed-40eb-bb46-47d987b3bd87\\input.xlsx",
+    "txt_folder": "static/uploads\\72c6de44-b4ed-40eb-bb46-47d987b3bd87\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\72c6de44-b4ed-40eb-bb46-47d987b3bd87\\result.xlsx",
+    "created_at": "2025-11-10T19:49:06.975941"
+  },
+  "3db5f22f-ebef-4d7f-98f9-e428526c715e": {
+    "task_id": "3db5f22f-ebef-4d7f-98f9-e428526c715e",
+    "name": "222",
+    "excel_file": "static/uploads\\3db5f22f-ebef-4d7f-98f9-e428526c715e\\input.xlsx",
+    "txt_folder": "static/uploads\\3db5f22f-ebef-4d7f-98f9-e428526c715e\\txt_files",
+    "status": "completed",
+    "progress": 100,
+    "message": "处理完成",
+    "result_file": "static/uploads\\3db5f22f-ebef-4d7f-98f9-e428526c715e\\result.xlsx",
+    "created_at": "2025-11-10T19:59:04.376256"
+  }
+}

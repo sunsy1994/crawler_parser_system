@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}任务列表 - 爬虫解析系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+    }
+    
+    .tasks-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .task-card {
+        background: white;
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        transition: all 0.2s;
+    }
+    
+    .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    }
+    
+    .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .task-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .task-id {
+        color: var(--apple-gray);
+        font-size: 0.9rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-processing { background: #cce7ff; color: var(--apple-blue); }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-failed { background: #f8d7da; color: #721c24; }
+    
+    .task-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .detail-label {
+        font-size: 0.8rem;
+        color: var(--apple-gray);
+    }
+    
+    .detail-value {
+        font-weight: 500;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: var(--apple-border);
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: var(--apple-blue);
+        transition: width 0.3s ease;
+    }
+    
+    .task-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--apple-gray);
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">解析任务</h1>
+    <a href="/create_task" class="btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 2a1 1 0 00-1 1v4H3a1 1 0 100 2h4v4a1 1 0 102 0V9h4a1 1 0 100-2H9V3a1 1 0 00-1-1z"/>
+        </svg>
+        新建任务
+    </a>
+</div>
+
+<div class="tasks-grid">
+    {% if tasks %}
+        {% for task in tasks %}
+        <div class="task-card">
+            <div class="task-header">
+                <div>
+                    <div class="task-name">{{ task.name }}</div>
+                    <div class="task-id">ID: {{ task.task_id[:8] }}...</div>
+                </div>
+                <div class="status-badge status-{{ task.status }}">
+                    {% if task.status == 'pending' %}待处理
+                    {% elif task.status == 'processing' %}处理中
+                    {% elif task.status == 'completed' %}已完成
+                    {% elif task.status == 'failed' %}失败
+                    {% else %}{{ task.status }}{% endif %}
+                </div>
+            </div>
+            
+            <div class="task-details">
+                <div class="detail-item">
+                    <span class="detail-label">创建时间</span>
+                    <span class="detail-value">{{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">处理进度</span>
+                    <span class="detail-value">{{ task.progress }}%</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">状态信息</span>
+                    <span class="detail-value">{{ task.message }}</span>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ task.progress }}%"></div>
+            </div>
+            
+            <div class="task-actions">
+                <a href="/task/{{ task.task_id }}" class="btn btn-secondary">查看详情</a>
+                {% if task.status == 'completed' and task.result_file %}
+                <a href="/download/{{ task.task_id }}" class="btn">下载结果</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h3>暂无任务</h3>
+            <p>创建您的第一个解析任务</p>
+            <a href="/create_task" class="btn" style="margin-top: 1rem;">新建任务</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

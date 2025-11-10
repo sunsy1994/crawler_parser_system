@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}爬虫解析系统{% endblock %}</title>
+    <style>
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-text: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-border: #d2d2d7;
+            --apple-green: #34c759;
+            --apple-orange: #ff9500;
+            --apple-red: #ff3b30;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--apple-bg);
+            color: var(--apple-text);
+            line-height: 1.5;
+        }
+        
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--apple-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--apple-text);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--apple-blue);
+        }
+        
+        .nav-links a.active {
+            color: var(--apple-blue);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .btn {
+            background: var(--apple-blue);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #0077ed;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--apple-text);
+            border: 1px solid var(--apple-border);
+        }
+        
+        .btn-secondary:hover {
+            background: #f5f5f7;
+        }
+        
+        /* Flash消息样式 */
+        .flash-messages {
+            margin-bottom: 2rem;
+        }
+        
+        .flash-message {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .flash-success {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--apple-green);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+        
+        .flash-error {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--apple-red);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+        
+        .flash-info {
+            background: rgba(0, 113, 227, 0.1);
+            color: var(--apple-blue);
+            border: 1px solid rgba(0, 113, 227, 0.3);
+        }
+        
+        .flash-warning {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--apple-orange);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">爬虫解析系统</div>
+        <div class="nav-links">
+            <a href="/" {% if request.path == '/' %}class="active"{% endif %}>任务列表</a>
+            <a href="/create_task" {% if request.path == '/create_task' %}class="active"{% endif %}>新建任务</a>
+            <a href="/parsers" {% if request.path == '/parsers' %}class="active"{% endif %}>解析器管理</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- 显示flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,789 @@
+{% extends "base.html" %}
+
+{% block title %}解析器管理 - 爬虫解析系统{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material.min.css">
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+    }
+    
+    .page-subtitle {
+        color: var(--apple-gray);
+        margin-top: 0.5rem;
+    }
+    
+    .parsers-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+        height: calc(100vh - 200px);
+    }
+    
+    .parsers-sidebar {
+        background: white;
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--apple-border);
+    }
+    
+    .add-parser-btn {
+        background: var(--apple-green);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .add-parser-btn:hover {
+        background: #30b350;
+        transform: translateY(-1px);
+    }
+    
+    .parser-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1;
+    }
+    
+    .parser-item {
+        padding: 1rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    
+    .parser-item:hover {
+        background: var(--apple-bg);
+    }
+    
+    .parser-item.active {
+        background: var(--apple-blue);
+        color: white;
+        border-color: var(--apple-blue);
+    }
+    
+    .parser-info {
+        flex: 1;
+    }
+    
+    .parser-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .parser-channels {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+    
+    .parser-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        margin-top: 0.5rem;
+    }
+    
+    .status-online {
+        background: var(--apple-green);
+        color: white;
+    }
+    
+    .status-offline {
+        background: var(--apple-red);
+        color: white;
+    }
+    
+    .parser-actions {
+        display: flex;
+        gap: 0.25rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    
+    .parser-item:hover .parser-actions {
+        opacity: 1;
+    }
+    
+    .action-btn {
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        border-radius: 4px;
+        cursor: pointer;
+        color: inherit;
+        opacity: 0.7;
+        transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+        opacity: 1;
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .editor-container {
+        background: white;
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .editor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--apple-border);
+    }
+    
+    .editor-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    
+    .editor-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        background: var(--apple-blue);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .btn:hover {
+        background: #0077ed;
+        transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+        background: transparent;
+        color: var(--apple-text);
+        border: 1px solid var(--apple-border);
+    }
+    
+    .btn-secondary:hover {
+        background: #f5f5f7;
+    }
+    
+    .btn-success {
+        background: var(--apple-green);
+    }
+    
+    .btn-success:hover {
+        background: #30b350;
+    }
+    
+    .code-editor {
+        flex: 1;
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .editor-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--apple-border);
+        font-size: 0.8rem;
+        color: var(--apple-gray);
+    }
+    
+    .last-modified {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--apple-gray);
+        text-align: center;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .test-panel {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: var(--apple-bg);
+        border-radius: 12px;
+        border: 1px solid var(--apple-border);
+    }
+    
+    .test-header {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .test-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--apple-border);
+        border-radius: 8px;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.8rem;
+        resize: vertical;
+        min-height: 80px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .test-result {
+        background: white;
+        border: 1px solid var(--apple-border);
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.8rem;
+        max-height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+
+    /* 模态框样式 */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 18px;
+        padding: 2rem;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    
+    .modal-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    input, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--apple-border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+    
+    input:focus, textarea:focus {
+        outline: none;
+        border-color: var(--apple-blue);
+        box-shadow: 0 0 0 4px rgba(0,113,227,0.1);
+    }
+    
+    .form-hint {
+        font-size: 0.8rem;
+        color: var(--apple-gray);
+        margin-top: 0.25rem;
+    }
+    
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .CodeMirror {
+        height: 400px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">解析器管理</h1>
+        <p class="page-subtitle">管理和编辑各平台解析器代码，支持自定义添加</p>
+    </div>
+</div>
+
+<div class="parsers-grid">
+    <!-- 左侧解析器列表 -->
+    <div class="parsers-sidebar">
+        <div class="sidebar-header">
+            <h3>解析器列表</h3>
+            <button class="add-parser-btn" id="addParserBtn">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 2a1 1 0 00-1 1v4H3a1 1 0 100 2h4v4a1 1 0 102 0V9h4a1 1 0 100-2H9V3a1 1 0 00-1-1z"/>
+                </svg>
+                添加解析器
+            </button>
+        </div>
+        <div class="parser-list" id="parserList">
+            <!-- 解析器列表将通过JavaScript动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 右侧代码编辑器 -->
+    <div class="editor-container">
+        <div class="editor-header">
+            <div class="editor-title" id="editorTitle">选择解析器进行编辑</div>
+            <div class="editor-actions" id="editorActions" style="display: none;">
+                <button class="btn btn-secondary" id="testBtn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M6 2a1 1 0 00-1 1v10a1 1 0 001 1h4a1 1 0 001-1V3a1 1 0 00-1-1H6zM5 3a2 2 0 012-2h4a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V3z"/>
+                        <path d="M4 6h8v1H4V6z"/>
+                    </svg>
+                    测试
+                </button>
+                <button class="btn btn-secondary" id="reloadBtn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 3a5 5 0 00-5 5 5 5 0 005 5 5 5 0 005-5 5 5 0 00-5-5zM2 8a6 6 0 016-6 6 6 0 016 6 6 6 0 01-6 6 6 6 0 01-6-6z"/>
+                        <path d="M8 4.5l-3 3 3 3V4.5z"/>
+                    </svg>
+                    重载
+                </button>
+                <button class="btn btn-success" id="saveBtn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M13.5 2H2a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V4.5L13.5 2zM2 14V4h4v2h6V4h1.5L14 5.5V14H2z"/>
+                        <path d="M4 0h8l4 4v10a2 2 0 01-2 2H2a2 2 0 01-2-2V2a2 2 0 012-2h2z"/>
+                    </svg>
+                    保存
+                </button>
+            </div>
+        </div>
+        
+        <div id="emptyState" class="empty-state">
+            <div class="empty-icon">⚙️</div>
+            <h3>选择解析器</h3>
+            <p>从左侧选择一个解析器进行编辑，或添加新的解析器</p>
+        </div>
+        
+        <div id="editorContent" style="display: none; flex: 1; flex-direction: column;">
+            <textarea id="codeEditor" class="code-editor"></textarea>
+            
+            <!-- 测试面板 -->
+            <div class="test-panel">
+                <div class="test-header">
+                    <span>测试解析器</span>
+                    <button class="btn" id="runTestBtn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+                        运行测试
+                    </button>
+                </div>
+                <textarea class="test-input" placeholder="输入HTML内容进行测试..."></textarea>
+                <div class="test-result" id="testResult">测试结果将显示在这里...</div>
+            </div>
+            
+            <div class="editor-footer">
+                <div class="last-modified">
+                    <span id="lastModified">最后修改: -</span>
+                </div>
+                <div>Python 3.8+</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加解析器模态框 -->
+<div class="modal" id="addParserModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">添加新解析器</h2>
+        </div>
+        <form id="addParserForm">
+            <div class="form-group">
+                <label for="parserName">解析器名称</label>
+                <input type="text" id="parserName" name="parserName" placeholder="例如: B站解析器" required>
+                <div class="form-hint">解析器的显示名称</div>
+            </div>
+            <div class="form-group">
+                <label for="parserClass">解析器类名</label>
+                <input type="text" id="parserClass" name="parserClass" placeholder="例如: BilibiliParser" required>
+                <div class="form-hint">Python类名，必须符合Python命名规范</div>
+            </div>
+            <div class="form-group">
+                <label for="parserChannels">支持的渠道</label>
+                <input type="text" id="parserChannels" name="parserChannels" placeholder="例如: bilibili, B站, b站" required>
+                <div class="form-hint">多个渠道用逗号分隔，将自动注册到解析器工厂</div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelAddBtn">取消</button>
+                <button type="submit" class="btn btn-success">创建解析器</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+<script>
+    // 解析器数据
+    let parsers = {{ parsers|tojson|safe }};
+    let currentParser = null;
+    let editor = null;
+
+    // 初始化页面
+    function initPage() {
+        renderParserList();
+        initCodeEditor();
+        bindEvents();
+    }
+
+    // 渲染解析器列表
+    function renderParserList() {
+        const parserList = document.getElementById('parserList');
+        parserList.innerHTML = '';
+        
+        parsers.forEach(parser => {
+            const parserItem = document.createElement('div');
+            parserItem.className = 'parser-item';
+            parserItem.dataset.id = parser.class_name;
+            parserItem.innerHTML = `
+                <div class="parser-info">
+                    <div class="parser-name">${parser.name}</div>
+                    <div class="parser-channels">${parser.channels.join(', ')}</div>
+                    <div class="parser-status status-${parser.status}">
+                        <span>●</span> ${parser.status === 'online' ? '正常' : '离线'}
+                    </div>
+                </div>
+                <div class="parser-actions">
+                    <button class="action-btn edit-btn" title="编辑">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43743 22.1213 4C22.1213 4.56257 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn delete-btn" title="删除" data-parser="${parser.class_name}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            parserList.appendChild(parserItem);
+        });
+    }
+
+    // 初始化代码编辑器
+    function initCodeEditor() {
+        editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+            mode: 'python',
+            theme: 'material',
+            lineNumbers: true,
+            indentUnit: 4,
+            smartIndent: true,
+            matchBrackets: true,
+            autoCloseBrackets: true,
+            lineWrapping: true
+        });
+    }
+
+    // 绑定事件
+    function bindEvents() {
+        // 解析器点击事件
+        document.addEventListener('click', function(e) {
+            const parserItem = e.target.closest('.parser-item');
+            if (parserItem) {
+                if (e.target.closest('.delete-parser')) {
+                    deleteParser(parserItem.dataset.id);
+                } else {
+                    selectParser(parserItem.dataset.id);
+                }
+            }
+        });
+
+        // 添加解析器按钮
+        document.getElementById('addParserBtn').addEventListener('click', showAddParserModal);
+        document.getElementById('cancelAddBtn').addEventListener('click', hideAddParserModal);
+        document.getElementById('addParserForm').addEventListener('submit', handleAddParser);
+
+        // 编辑器操作按钮
+        document.getElementById('saveBtn').addEventListener('click', saveParserCode);
+        document.getElementById('reloadBtn').addEventListener('click', reloadParser);
+        document.getElementById('runTestBtn').addEventListener('click', runParserTest);
+    }
+
+    // 选择解析器
+    function selectParser(parserId) {
+        const parser = parsers.find(p => p.class_name === parserId);
+        if (!parser) return;
+
+        currentParser = parser;
+        
+        // 更新UI
+        document.querySelectorAll('.parser-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelector(`.parser-item[data-id="${parserId}"]`).classList.add('active');
+        
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('editorContent').style.display = 'flex';
+        document.getElementById('editorActions').style.display = 'flex';
+        
+        document.getElementById('editorTitle').textContent = `${parser.name}代码`;
+        document.getElementById('lastModified').textContent = `最后修改: ${new Date(parser.last_modified).toLocaleString('zh-CN')}`;
+        
+        editor.setValue(parser.code);
+    }
+
+    // 显示添加解析器模态框
+    function showAddParserModal() {
+        document.getElementById('addParserModal').style.display = 'flex';
+    }
+
+    // 隐藏添加解析器模态框
+    function hideAddParserModal() {
+        document.getElementById('addParserModal').style.display = 'none';
+        document.getElementById('addParserForm').reset();
+    }
+
+    // 处理添加解析器
+    function handleAddParser(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const parserName = formData.get('parserName');
+        const parserClass = formData.get('parserClass');
+        const parserChannels = formData.get('parserChannels').split(',').map(s => s.trim());
+        
+        // 发送创建请求
+        fetch('/api/parser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: parserName,
+                class_name: parserClass,
+                channels: parserChannels
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('创建失败: ' + data.error);
+            } else {
+                // 重新加载页面
+                location.reload();
+            }
+        })
+        .catch(error => {
+            alert('创建失败: ' + error);
+        });
+    }
+
+    // 删除解析器
+    function deleteParser(parserId) {
+        if (confirm('确定要删除这个解析器吗？此操作不可恢复。')) {
+            // 这里应该发送删除请求到后端
+            alert('删除功能暂未实现');
+        }
+    }
+
+    // 保存解析器代码
+    function saveParserCode() {
+        if (!currentParser) return;
+        
+        const code = editor.getValue();
+        
+        fetch(`/api/parser/${currentParser.class_name}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                code: code
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('保存失败: ' + data.error);
+            } else {
+                alert('代码保存成功！');
+                // 更新最后修改时间
+                document.getElementById('lastModified').textContent = `最后修改: ${new Date().toLocaleString('zh-CN')}`;
+            }
+        })
+        .catch(error => {
+            alert('保存失败: ' + error);
+        });
+    }
+
+    // 重载解析器
+    function reloadParser() {
+        if (!currentParser) return;
+        
+        if (confirm('确定要重新加载解析器吗？')) {
+            fetch(`/api/parser/${currentParser.class_name}/reload`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('重载失败: ' + data.error);
+                } else {
+                    alert('解析器重载成功！');
+                }
+            })
+            .catch(error => {
+                alert('重载失败: ' + error);
+            });
+        }
+    }
+
+    // 运行解析器测试
+    function runParserTest() {
+        if (!currentParser) return;
+        
+        const testInput = document.querySelector('.test-input').value;
+        if (!testInput.trim()) {
+            alert('请输入测试的HTML内容');
+            return;
+        }
+        
+        document.getElementById('testResult').textContent = '测试运行中...';
+        
+        // 调用后端API进行实际测试
+        fetch(`/api/parser/${currentParser.class_name}/test`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                html_content: testInput
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('testResult').textContent = `测试失败: ${data.error}`;
+            } else {
+                document.getElementById('testResult').textContent = JSON.stringify(data.result, null, 2);
+            }
+        })
+        .catch(error => {
+            document.getElementById('testResult').textContent = `测试请求失败: ${error}`;
+        });
+    }
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', initPage);
+    
+    // 处理删除解析器
+    document.addEventListener('DOMContentLoaded', function() {
+        // 删除按钮事件监听
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // 阻止冒泡，避免触发解析器选择
+                const parserName = this.getAttribute('data-parser');
+                
+                if (confirm(`确定要删除解析器 "${parserName}" 吗？`)) {
+                    fetch(`/api/parser/${parserName}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(`删除失败: ${data.error}`);
+                        } else {
+                            alert(`删除成功: ${data.message}`);
+                            // 刷新页面
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        alert('删除失败，请重试');
+                        console.error('删除解析器错误:', error);
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
