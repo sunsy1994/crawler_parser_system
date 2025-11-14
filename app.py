@@ -10,6 +10,7 @@ from datetime import datetime
 from models.task import Task
 from models.parser import Parser
 from utils.background_tasks import TaskProcessor
+from parsers.base_parser import BaseParser  
 
 app = Flask(__name__)
 app.secret_key = 'crawler-parser-system-secret-key-2024'
@@ -184,24 +185,72 @@ def reload_parser(parser_name):
     else:
         return jsonify({'error': '重新加载失败'}), 500
 
+# 确保在 app.py 的顶部有这些 import
+import sys
+import io
+import contextlib
+from bs4 import BeautifulSoup
+import re
+import json
+import html
+import urllib.parse
+import hashlib
+import traceback
+
+# 确保在 app.py 的顶部有这些 import
+import sys
+import io
+import contextlib
+from bs4 import BeautifulSoup
+import re
+import json
+import html
+import urllib.parse
+import hashlib
+import traceback
+# 并且有: from parsers.base_parser import BaseParser 
+
+# ... (你 app.py 中的其他代码) ...
+
 @app.route('/api/parser/<parser_name>/test', methods=['POST'])
 def test_parser(parser_name):
-    """测试解析器"""
-    parser = Parser.get_parser(parser_name)
-    if not parser:
-        return jsonify({'error': '解析器不存在'}), 404
+    """
+    测试解析器（V4 - 最终版）
+    使用从 parsers.base_parser 导入的真实 BaseParser，
+    确保测试环境与 utils/parser_factory 的执行环境一致。
+    """
     
-    data = request.get_json()
-    html_content = data.get('html_content', '')
+    # 立即初始化日志捕获
+    captured_output = io.StringIO()
     
     try:
-        # 动态执行解析器代码并测试
-        import sys
-        import io
-        import contextlib
-        from bs4 import BeautifulSoup
+        # --- 1. 获取数据 ---
         
-        # 创建一个安全的执行环境，但允许必要的导入
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': '无效的JSON数据', 'stdout': '请求体为空或 Content-Type 不是 application/json'}), 400
+            
+        html_content = data.get('html_content', '')
+        code_to_test = data.get('code') 
+
+        processed_code = ""
+        
+        if code_to_test:
+            processed_code = code_to_test
+            print(f"--- 开始测试 {parser_name} (使用编辑器实时代码) ---")
+        else:
+            parser = Parser.get_parser(parser_name)
+            if not parser:
+                return jsonify({'error': '解析器不存在'}), 404
+            processed_code = parser.code
+            print(f"--- 开始测试 {parser_name} (使用已保存的代码) ---")
+
+        if not html_content.strip():
+            return jsonify({'error': '测试HTML内容不能为空'}), 400
+        
+        # --- 2. 动态执行环境 (使用真实的 BaseParser) ---
+        
+        # (allowed_builtins 的定义保持不变)
         allowed_builtins = {
             'list': list, 'dict': dict, 'str': str, 'int': int, 'float': float,
             'bool': bool, 'range': range, 'len': len, 'zip': zip, 'map': map,
@@ -222,83 +271,90 @@ def test_parser(parser_name):
             'list': list, 'tuple': tuple, 'set': set, 'frozenset': frozenset,
             'dict': dict, 'type': type, 'classmethod': classmethod,
             'staticmethod': staticmethod, 'property': property,
-            '__import__': __import__,  # 允许导入模块
-            '__build_class__': __build_class__  # 允许创建类
+            '__import__': __import__,
+            '__build_class__': __build_class__
         }
         
         exec_globals = {
-        '__builtins__': allowed_builtins,
-        '__name__': '__main__',  # 添加__name__变量以支持常见Python代码模式
-        '__file__': '',  # 添加__file__变量以支持文件相关操作
-        '__package__': None,  # 添加__package__变量
-        '__doc__': None,  # 添加__doc__变量
-    }
+            '__builtins__': allowed_builtins,
+            '__name__': '__main__',
+            '__file__': '',
+            '__package__': None,
+            '__doc__': None,
+        }
+        
+        # 预加载模块
         exec_globals['BeautifulSoup'] = BeautifulSoup
-        # 预加载常用模块
-        import re
-        import json
-        import html
-        import urllib.parse
-        import hashlib
         exec_globals['re'] = re
         exec_globals['json'] = json
         exec_globals['html'] = html
         exec_globals['urllib'] = urllib
         exec_globals['hashlib'] = hashlib
         
-        # 定义BaseParser类的简化版本用于测试，处理相对导入问题
-        class BaseParser:
-            def __init__(self, file_path='test_file.html'):
-                self.file_path = file_path
-                
-            class Logger:
-                def info(self, msg):
-                    print(f"INFO: {msg}")
-                    
-                def error(self, msg):
-                    print(f"ERROR: {msg}")
-            
-            @property
-            def logger(self):
-                return self.Logger()
+        # --- 3. 关键变更：不再定义模拟类，而是注入真实的类 ---
+        # (删除了 class BaseParser: ... 的定义)
         
-        # 同时设置为BaseParser和TestBaseParser，以兼容不同的导入方式
+        # 注入从文件顶部导入的真实 BaseParser
         exec_globals['BaseParser'] = BaseParser
-        exec_globals['TestBaseParser'] = BaseParser
+        exec_globals['TestBaseParser'] = BaseParser # 兼容两种导入
         
-        # 预处理解析器代码，替换相对导入
-        processed_code = parser.code
-        # 替换相对导入语句
-        processed_code = processed_code.replace('from .base_parser import BaseParser', '# 已替换为测试环境的BaseParser')
-        processed_code = processed_code.replace('from base_parser import BaseParser', '# 已替换为测试环境的BaseParser')
+        # --- 4. 预处理和执行 ---
         
-        # 添加调试信息，输出解析器代码的前300个字符
-        print("解析器代码前300字符:", processed_code[:300])
-        # 检查是否包含示例数据代码
-        if '示例用户' in processed_code:
-            print("警告: 解析器代码中包含示例用户数据")
+        # 我们仍然需要替换，因为 exec() 无法处理执行字符串中的相对导入
+        processed_code = processed_code.replace('from .base_parser import BaseParser', '# [Test Env] 已替换为测试环境的BaseParser')
+        processed_code = processed_code.replace('from base_parser import BaseParser', '# [Test Env] 已替换为测试环境的BaseParser')
+        processed_code = processed_code.replace('from parsers.base_parser import BaseParser', '# [Test Env] 已替换为测试环境的BaseParser')
         
-        # 移除之前的复杂字符串替换逻辑，改为在运行时动态替换方法
-        # 执行处理后的解析器代码
-        exec(processed_code, exec_globals)
+        print("解析器代码(替换后)前400字符:", processed_code[:400])
         
-        # 创建解析器实例并运行测试
-        parser_class = exec_globals[parser_name]
-        parser_instance = parser_class('test_file.html')  # 传递file_path参数
-        
-        # 不使用自定义解析方法，直接使用解析器自身的parse实现
-        
-        # 不替换解析器的parse方法，直接使用解析器自身的实现
-        print("使用解析器自身的parse方法")
-        
-        # 捕获标准输出
-        captured_output = io.StringIO()
+        result = None
+        error_message = None
+
         with contextlib.redirect_stdout(captured_output):
-            result = parser_instance.parse(html_content)
+            try:
+                # 执行处理后的解析器代码
+                exec(processed_code, exec_globals)
+                
+                if parser_name not in exec_globals:
+                    raise NameError(f"在执行的代码中未找到类: {parser_name}。请确保类名与解析器类名匹配。")
+                    
+                parser_class = exec_globals[parser_name]
+                # 传入 'test_file.html'，与真实的 parser_factory 行为保持一致
+                parser_instance = parser_class('test_file.html') 
+                
+                print(f"正在使用 {parser_name} 实例 (继承自 *真实* BaseParser) 的 .parse() 方法...")
+                
+                result = parser_instance.parse(html_content)
+            
+            except Exception as e:
+                print(f"--- 测试执行出错 --- ")
+                traceback.print_exc(file=captured_output)
+                error_message = str(e)
+
+        # --- 5. 格式化并返回JSON ---
+        stdout_output = captured_output.getvalue()
+        print("--- (Flask) 测试标准输出 ---\n" + stdout_output)
+        print("--- (Flask) 测试结束 ---")
+
+        if error_message:
+            return jsonify({'error': f"执行错误: {error_message}", 'stdout': stdout_output}), 500
+        else:
+            return jsonify({'result': result, 'stdout': stdout_output})
         
-        return jsonify({'result': result})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # --- 6. 捕获所有 *外部* 异常 (例如 get_json 失败, 导入失败等) ---
+        
+        error_trace = traceback.format_exc()
+        print(f"--- (Flask) 严重的测试错误 (未捕获的异常) ---\n{error_trace}")
+        
+        stdout_output = captured_output.getvalue()
+        full_error_message = f"严重的外部错误: {str(e)}"
+        
+        return jsonify({
+            'error': full_error_message, 
+            'stdout': stdout_output, 
+            'trace': error_trace
+        }), 500
 
 @app.route('/api/parser', methods=['POST'])
 def create_parser():

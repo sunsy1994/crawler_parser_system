@@ -571,15 +571,21 @@
 
     // 绑定事件
     function bindEvents() {
-        // 解析器点击事件
+        // 解析器点击事件 (使用事件委托)
         document.addEventListener('click', function(e) {
             const parserItem = e.target.closest('.parser-item');
-            if (parserItem) {
-                if (e.target.closest('.delete-parser')) {
-                    deleteParser(parserItem.dataset.id);
-                } else {
-                    selectParser(parserItem.dataset.id);
-                }
+            // 修正：检查 .delete-btn
+            const deleteBtn = e.target.closest('.delete-btn'); 
+
+            if (deleteBtn && parserItem) {
+                // 点击了删除按钮
+                e.stopPropagation(); // 阻止触发 parserItem 的选择事件
+                const parserName = deleteBtn.getAttribute('data-parser');
+                handleDeleteParser(parserName);
+            }
+            else if (parserItem) {
+                // 点击了 parser item (非删除按钮)
+                selectParser(parserItem.dataset.id);
             }
         });
 
@@ -609,7 +615,7 @@
                 reader.onerror = function() {
                     alert('文件读取失败，请重试');
                 };
-                reader.readAsText(file);
+                reader.readAsText(file,'UTF-8');
             }
             // 清空文件选择，允许重复选择同一文件
             this.value = '';
@@ -640,9 +646,9 @@
         
         // 清理测试输入区域和结果区域的内容
         const testInput = document.querySelector('.test-input');
-        const testResult = document.querySelector('.test-result');
+        const testResult = document.getElementById('testResult'); // 修正：使用ID获取
         if (testInput) testInput.value = '';
-        if (testResult) testResult.textContent = '// 解析结果将显示在这里';
+        if (testResult) testResult.textContent = '测试结果将显示在这里...'; // 修正：使用 textContent
         
         // 清空文件上传
         const fileUpload = document.getElementById('fileUpload');
@@ -695,11 +701,26 @@
         });
     }
 
-    // 删除解析器
-    function deleteParser(parserId) {
-        if (confirm('确定要删除这个解析器吗？此操作不可恢复。')) {
-            // 这里应该发送删除请求到后端
-            alert('删除功能暂未实现');
+    // 修正：新增处理删除的函数
+    function handleDeleteParser(parserName) {
+        if (confirm(`确定要删除解析器 "${parserName}" 吗？此操作不可恢复。`)) {
+            fetch(`/api/parser/${parserName}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(`删除失败: ${data.error}`);
+                } else {
+                    alert(`删除成功: ${data.message}`);
+                    // 刷新页面以更新列表
+                    location.reload(); 
+                }
+            })
+            .catch(error => {
+                alert('删除失败，请重试');
+                console.error('删除解析器错误:', error);
+            });
         }
     }
 
@@ -726,6 +747,12 @@
                 alert('代码保存成功！');
                 // 更新最后修改时间
                 document.getElementById('lastModified').textContent = `最后修改: ${new Date().toLocaleString('zh-CN')}`;
+                // 同步更新内存中的 parsers 数组的代码，以便下次测试时（如果未刷新页面）使用新代码
+                const parserInList = parsers.find(p => p.class_name === currentParser.class_name);
+                if (parserInList) {
+                    parserInList.code = code;
+                    parserInList.last_modified = new Date().toISOString();
+                }
             }
         })
         .catch(error => {
@@ -760,8 +787,16 @@
         if (!currentParser) return;
         
         const testInput = document.querySelector('.test-input').value;
+        // 修正：获取编辑器中的当前代码
+        const codeToTest = editor.getValue(); 
+        
         if (!testInput.trim()) {
             alert('请输入测试的HTML内容或上传文件');
+            return;
+        }
+        
+        if (!codeToTest.trim()) {
+            alert('编辑器中的代码不能为空');
             return;
         }
         
@@ -774,17 +809,30 @@
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                html_content: testInput
+                html_content: testInput,
+                code: codeToTest // 修正：将当前代码发送到后端
             })
         })
         .then(response => response.json())
         .then(data => {
+            // 修正：显示更详细的输出
+            let resultText = "";
+            
+            if (data.stdout) {
+                resultText += "--- 标准输出 (Logs) ---\n" + data.stdout + "\n\n";
+            }
+            
             if (data.error) {
-                document.getElementById('testResult').textContent = `测试失败: ${data.error}`;
+                resultText += `--- 测试失败 ---\n${data.error}`;
+                if(data.trace) {
+                    resultText += "\n\n--- Traceback ---\n" + data.trace;
+                }
             } else {
                 // 显示格式化的JSON结果
-                document.getElementById('testResult').textContent = JSON.stringify(data.result, null, 2);
+                resultText += "--- 解析结果 (Result) ---\n" + JSON.stringify(data.result, null, 2);
             }
+            
+            document.getElementById('testResult').textContent = resultText;
         })
         .catch(error => {
             document.getElementById('testResult').textContent = `测试请求失败: ${error}`;
@@ -794,35 +842,7 @@
     // 初始化页面
     document.addEventListener('DOMContentLoaded', initPage);
     
-    // 处理删除解析器
-    document.addEventListener('DOMContentLoaded', function() {
-        // 删除按钮事件监听
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation(); // 阻止冒泡，避免触发解析器选择
-                const parserName = this.getAttribute('data-parser');
-                
-                if (confirm(`确定要删除解析器 "${parserName}" 吗？`)) {
-                    fetch(`/api/parser/${parserName}`, {
-                        method: 'DELETE'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            alert(`删除失败: ${data.error}`);
-                        } else {
-                            alert(`删除成功: ${data.message}`);
-                            // 刷新页面
-                            location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        alert('删除失败，请重试');
-                        console.error('删除解析器错误:', error);
-                    });
-                }
-            });
-        });
-    });
+    // 修正：移除了多余的、功能不正确的 DOMContentLoaded 监听器
+    
 </script>
 {% endblock %}
