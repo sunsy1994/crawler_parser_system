@@ -71,5 +71,17 @@
     "status": "online",
     "last_modified": "2025-11-10T19:52:48.244571",
     "created_at": "2025-11-10T19:52:48.244582"
+  },
+  "QicheParser": {
+    "name": "汽车之家解析器",
+    "class_name": "QicheParser",
+    "channels": [
+      "qichezhijia",
+      "汽车之家"
+    ],
+    "code": "from bs4 import BeautifulSoup\nimport re\nfrom parsers.base_parser import BaseParser\n\nclass QicheParser(BaseParser):\n    \"\"\"汽车之家解析器\"\"\"\n    \n    def parse(self, html_content):\n        \"\"\"系统调用的主入口方法\"\"\"\n        try:\n            result = {\n                \"platform\": \"qichezhijia\", \n                \"status\": \"success\"\n            }\n            \n            # 调用具体的解析逻辑\n            comments = self.parse_comments(html_content)\n            \n            result['comments_count'] = len(comments)\n            result['comments'] = comments\n            \n            self.logger.info(f\"汽车之家解析成功: {self.file_path}\")\n            return result\n            \n        except Exception as e:\n            self.logger.error(f\"汽车之家解析失败: {e}\")\n            return {\"platform\": \"qichezhijia\", \"status\": \"error\", \"error\": str(e)}\n\n    def parse_comments(self, html_content):\n        soup = BeautifulSoup(html_content, 'html.parser')\n        comments = []\n\n        # 查找所有主评论\n        primary_comments = soup.find_all('auto-comment-primary-comment')\n\n        for pc in primary_comments:\n            # 提取主评论信息\n            author_tag = pc.find('div', class_='auto-comment__author-name')\n            author = author_tag.get_text(strip=True) if author_tag else \"未知作者\"\n\n            time_tag = pc.find('span', class_='time')\n            time_text = time_tag.get_text(strip=True) if time_tag else \"未知时间\"\n\n            text_box = pc.find('div', class_='textBox')\n            content = text_box.get_text(strip=True) if text_box else \"\"\n\n            # 主评论不是回复\n            is_reply = '否' # 建议统一格式为字符串 '否'\n            reply_to = '无'\n\n            comments.append({\n                '作者': author,     # 建议键名统一为中文，与其他解析器保持一致\n                '评论内容': content,\n                '评论时间': time_text,\n                '是否回复': is_reply,\n                '回复给': reply_to,\n            })\n\n            # 查找该主评论下的回复\n            secondary_comments = pc.find_all('auto-comment-secondary-comment')\n            \n            for sc in secondary_comments:\n                author_tag = sc.find('div', class_='auto-comment__author-name')\n                reply_author = author_tag.get_text(strip=True) if author_tag else \"未知作者\"\n\n                time_tag = sc.find('span', class_='secondaryComment-time')\n                reply_time = time_tag.get_text(strip=True) if time_tag else \"未知时间\"\n\n                text_box = sc.find('div', class_='secondaryComment-textBox')\n                reply_content = text_box.get_text(strip=True) if text_box else \"\"\n\n                # 回复对象为主评论作者\n                reply_to = author\n\n                comments.append({\n                    '作者': reply_author,\n                    '评论内容': reply_content,\n                    '评论时间': reply_time,\n                    '是否回复': '是',\n                    '回复给': reply_to,\n                })\n\n        return comments",
+    "status": "online",
+    "last_modified": "2025-12-08T14:36:40.421651",
+    "created_at": "2025-12-08T14:17:30.302521"
   }
 }
